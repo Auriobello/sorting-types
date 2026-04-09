@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shakesort - Algoritmo di Ordinamento</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="bogosort.html">Bogosort</a></li>
+            <li><a href="quicksort.html">Quicksort</a></li>
+            <li><a href="bubblesort.html">Bubblesort</a></li>
+            <li><a href="shakesort.html">Shakesort</a></li>
+            <li><a href="insertionsort.html">Insertionsort</a></li>
+            <li><a href="selectionsort.html">Selectionsort</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Shakesort (Cocktail Sort)</h1>
+        <p>Variante bidirezionale di Bubblesort</p>
+    </header>
+
+    <main>
+        <section id="introduzione">
+            <h2>Introduzione</h2>
+            <p>Shakesort, anche conosciuto come Cocktail Sort, è una variante bidirezionale di Bubblesort. Invece di muoversi solo da sinistra a destra, alterna le direzioni in ogni passaggio, riducendo leggermente il numero di confronti.</p>
+            <p><strong>Complessità temporale:</strong> O(n²) in tutti i casi</p>
+            <p><strong>Complessità spaziale:</strong> O(1) (ordinamento in loco)</p>
+        </section>
+
+        <section id="funzionamento">
+            <h2>Come Funziona</h2>
+            <ol>
+                <li>Passaggio da sinistra a destra: sposta il massimo alla fine</li>
+                <li>Passaggio da destra a sinistra: sposta il minimo all'inizio</li>
+                <li>Ripeti alternando le direzioni fino a quando non ci sono scambi</li>
+            </ol>
+        </section>
+
+        <section id="implementazione">
+            <h2>Implementazione in C</h2>
+            <pre><code>void cocktailSort(int a[], int n) {
+    int swapped = 1;
+    int start = 0;
+    int end = n - 1;
+
+    while (swapped) {
+        swapped = 0;
+
+        // Passaggio da sinistra a destra
+        for (int i = start; i &lt; end; ++i) {
+            if (a[i] &gt; a[i + 1]) {
+                int temp = a[i];
+                a[i] = a[i + 1];
+                a[i + 1] = temp;
+                swapped = 1;
+            }
+        }
+
+        // Se non ci sono stati scambi, l'array è ordinato
+        if (!swapped)
+            break;
+
+        swapped = 0;
+        --end;
+
+        // Passaggio da destra a sinistra
+        for (int i = end - 1; i &gt;= start; --i) {
+            if (a[i] &gt; a[i + 1]) {
+                int temp = a[i];
+                a[i] = a[i + 1];
+                a[i + 1] = temp;
+                swapped = 1;
+            }
+        }
+
+        ++start;
+    }
+}</code></pre>
+            <p>Questa implementazione ottimizzata ferma l'algoritmo quando non ci sono più scambi in un passaggio completo.</p>
+        </section>
+
+        <section id="vantaggi">
+            <h2>Vantaggi rispetto a Bubblesort</h2>
+            <ul>
+                <li>Leggermente più efficiente in pratica</li>
+                <li>Stesso numero di scambi ma meno confronti inutili</li>
+                <li>Utile per array quasi ordinati</li>
+            </ul>
+        </section>
+
+        <section id="conclusione">
+            <h2>Conclusione</h2>
+            <p>Shakesort è un miglioramento marginale di Bubblesort, ancora O(n²) ma con prestazioni leggermente migliori. È utile principalmente per scopi didattici.</p>
+        </section>
+
+        <section id="visualizzazione">
+            <h2>Visualizzazione Shakesort</h2>
+            <div id="visualization-container">
+                <div id="bars-container"></div>
+                <div id="controls">
+                    <div class="control-group">
+                        <label for="array-size">Numeri: <span class="value-display" id="size-display">20</span></label>
+                        <input type="range" id="array-size" min="10" max="100" value="20">
+                    </div>
+                    <div class="control-group">
+                        <label for="speed">Velocità: <span class="value-display" id="speed-display">100ms</span></label>
+                        <input type="range" id="speed" min="10" max="1000" value="100" step="10">
+                    </div>
+                    <button id="start-btn">Avvia Ordinamento</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                <div id="status">Pronto</div>
+            </div>
+        </section>
+
+        <script src="sorting-visualization.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const visualizer = new SortingVisualizer('bars-container', 'shakesort');
+
+                // Controlli dimensione array
+                const sizeSlider = document.getElementById('array-size');
+                const sizeDisplay = document.getElementById('size-display');
+                sizeSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    sizeDisplay.textContent = value;
+                    visualizer.setArraySize(value);
+                });
+
+                // Controlli velocità
+                const speedSlider = document.getElementById('speed');
+                const speedDisplay = document.getElementById('speed-display');
+                speedSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    speedDisplay.textContent = value + 'ms';
+                    visualizer.setSpeed(value);
+                });
+
+                // Pulsanti
+                document.getElementById('start-btn').addEventListener('click', () => visualizer.start());
+                document.getElementById('reset-btn').addEventListener('click', () => visualizer.reset());
+            });
+        </script>

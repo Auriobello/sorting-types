@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubblesort - Algoritmo di Ordinamento</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="bogosort.html">Bogosort</a></li>
+            <li><a href="quicksort.html">Quicksort</a></li>
+            <li><a href="bubblesort.html">Bubblesort</a></li>
+            <li><a href="shakesort.html">Shakesort</a></li>
+            <li><a href="insertionsort.html">Insertionsort</a></li>
+            <li><a href="selectionsort.html">Selectionsort</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Bubblesort</h1>
+        <p>Algoritmo di ordinamento semplice ma inefficiente</p>
+    </header>
+
+    <main>
+        <section id="introduzione">
+            <h2>Introduzione</h2>
+            <p>Bubblesort è uno dei più semplici algoritmi di ordinamento. Confronta ripetutamente coppie adiacenti di elementi e li scambia se sono nell'ordine sbagliato. È anche conosciuto come sinking sort.</p>
+            <p><strong>Complessità temporale:</strong> O(n²) in tutti i casi</p>
+            <p><strong>Complessità spaziale:</strong> O(1) (ordinamento in loco)</p>
+        </section>
+
+        <section id="funzionamento">
+            <h2>Come Funziona</h2>
+            <ol>
+                <li>Confronta ogni coppia di elementi adiacenti</li>
+                <li>Scambia se sono nell'ordine sbagliato</li>
+                <li>Ripeti per tutto l'array</li>
+                <li>Ogni passaggio sposta il più grande elemento alla fine</li>
+                <li>Continua fino a quando non ci sono più scambi</li>
+            </ol>
+        </section>
+
+        <section id="implementazione">
+            <h2>Implementazione di Esempio</h2>
+            <pre><code>void bubbleSort(int arr[], int n) {
+    int i, j;
+    for (i = 0; i &lt; n-1; i++) {
+        for (j = 0; j &lt; n-i-1; j++) {
+            if (arr[j] &gt; arr[j+1]) {
+                // Scambia arr[j] e arr[j+1]
+                int temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+}</code></pre>
+            <p>Il ciclo esterno controlla il numero di passaggi, mentre quello interno confronta e scambia gli elementi adiacenti.</p>
+        </section>
+
+        <section id="ottimizzazioni">
+            <h2>Ottimizzazioni</h2>
+            <p>Una versione ottimizzata ferma l'algoritmo se non ci sono stati scambi in un passaggio:</p>
+            <pre><code>void bubbleSortOptimized(int arr[], int n) {
+    int i, j;
+    bool swapped;
+    for (i = 0; i &lt; n-1; i++) {
+        swapped = false;
+        for (j = 0; j &lt; n-i-1; j++) {
+            if (arr[j] &gt; arr[j+1]) {
+                int temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+                swapped = true;
+            }
+        }
+        if (swapped == false)
+            break;
+    }
+}</code></pre>
+        </section>
+
+        <section id="vantaggi">
+            <h2>Vantaggi e Svantaggi</h2>
+            <p><strong>Vantaggi:</strong></p>
+            <ul>
+                <li>Semplice da implementare e capire</li>
+                <li>Ordinamento in loco</li>
+                <li>Stabile</li>
+            </ul>
+            <p><strong>Svantaggi:</strong></p>
+            <ul>
+                <li>Molto lento per array grandi</li>
+                <li>O(n²) anche nel caso migliore (con ottimizzazione)</li>
+                <li>Non adatto per uso pratico</li>
+            </ul>
+        </section>
+
+        <section id="conclusione">
+            <h2>Conclusione</h2>
+            <p>Bubblesort è utile principalmente per scopi didattici e per ordinare piccoli array. Per applicazioni reali, usa algoritmi più efficienti come Quicksort o Mergesort.</p>
+        </section>
+
+        <section id="visualizzazione">
+            <h2>Visualizzazione Bubblesort</h2>
+            <div id="visualization-container">
+                <div id="bars-container"></div>
+                <div id="controls">
+                    <div class="control-group">
+                        <label for="array-size">Numeri: <span class="value-display" id="size-display">20</span></label>
+                        <input type="range" id="array-size" min="10" max="100" value="20">
+                    </div>
+                    <div class="control-group">
+                        <label for="speed">Velocità: <span class="value-display" id="speed-display">100ms</span></label>
+                        <input type="range" id="speed" min="10" max="1000" value="100" step="10">
+                    </div>
+                    <button id="start-btn">Avvia Ordinamento</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                <div id="status">Pronto</div>
+            </div>
+        </section>
+
+        <script src="sorting-visualization.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const visualizer = new SortingVisualizer('bars-container', 'bubblesort');
+
+                // Controlli dimensione array
+                const sizeSlider = document.getElementById('array-size');
+                const sizeDisplay = document.getElementById('size-display');
+                sizeSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    sizeDisplay.textContent = value;
+                    visualizer.setArraySize(value);
+                });
+
+                // Controlli velocità
+                const speedSlider = document.getElementById('speed');
+                const speedDisplay = document.getElementById('speed-display');
+                speedSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    speedDisplay.textContent = value + 'ms';
+                    visualizer.setSpeed(value);
+                });
+
+                // Pulsanti
+                document.getElementById('start-btn').addEventListener('click', () => visualizer.start());
+                document.getElementById('reset-btn').addEventListener('click', () => visualizer.reset());
+            });
+        </script>

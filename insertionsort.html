@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insertionsort - Algoritmo di Ordinamento</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="bogosort.html">Bogosort</a></li>
+            <li><a href="quicksort.html">Quicksort</a></li>
+            <li><a href="bubblesort.html">Bubblesort</a></li>
+            <li><a href="shakesort.html">Shakesort</a></li>
+            <li><a href="insertionsort.html">Insertionsort</a></li>
+            <li><a href="selectionsort.html">Selectionsort</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Insertionsort</h1>
+        <p>Algoritmo di ordinamento per inserimento</p>
+    </header>
+
+    <main>
+        <section id="introduzione">
+            <h2>Introduzione</h2>
+            <p>Insertionsort costruisce l'array ordinato finale un elemento alla volta. È molto efficiente per array piccoli o quasi ordinati, e viene spesso usato come base per algoritmi più complessi.</p>
+            <p><strong>Complessità temporale:</strong> O(n²) nel caso peggiore, O(n) nel caso migliore</p>
+            <p><strong>Complessità spaziale:</strong> O(1) (ordinamento in loco)</p>
+        </section>
+
+        <section id="funzionamento">
+            <h2>Come Funziona</h2>
+            <ol>
+                <li>Considera il primo elemento come già ordinato</li>
+                <li>Per ogni elemento successivo, inseriscilo nella posizione corretta nella parte già ordinata</li>
+                <li>Sposta gli elementi più grandi a destra per fare spazio</li>
+            </ol>
+        </section>
+
+        <section id="implementazione">
+            <h2>Implementazione in C</h2>
+            <pre><code>void insertionSort(int arr[], int n) {
+    int i, key, j;
+    for (i = 1; i &lt; n; i++) {
+        key = arr[i];
+        j = i - 1;
+
+        // Sposta gli elementi dell'array ordinato che sono
+        // maggiori della chiave di una posizione avanti
+        while (j &gt;= 0 && arr[j] &gt; key) {
+            arr[j + 1] = arr[j];
+            j = j - 1;
+        }
+        arr[j + 1] = key;
+    }
+}</code></pre>
+            <p>L'algoritmo mantiene una parte sinistra ordinata e inserisce ogni nuovo elemento nella posizione corretta.</p>
+        </section>
+
+        <section id="vantaggi">
+            <h2>Vantaggi e Svantaggi</h2>
+            <p><strong>Vantaggi:</strong></p>
+            <ul>
+                <li>Efficiente per array piccoli (n ≤ 10-20)</li>
+                <li>Molto efficiente per array quasi ordinati</li>
+                <li>Stabile e in loco</li>
+                <li>Semplice da implementare</li>
+            </ul>
+            <p><strong>Svantaggi:</strong></p>
+            <ul>
+                <li>O(n²) per array grandi o inversamente ordinati</li>
+                <li>Non adatto per grandi dataset</li>
+            </ul>
+        </section>
+
+        <section id="conclusione">
+            <h2>Conclusione</h2>
+            <p>Insertionsort è eccellente per piccoli array o come parte di algoritmi ibridi. È spesso usato in combinazione con algoritmi più veloci per ottimizzare le prestazioni.</p>
+        </section>
+
+        <section id="visualizzazione">
+            <h2>Visualizzazione Insertionsort</h2>
+            <div id="visualization-container">
+                <div id="bars-container"></div>
+                <div id="controls">
+                    <div class="control-group">
+                        <label for="array-size">Numeri: <span class="value-display" id="size-display">20</span></label>
+                        <input type="range" id="array-size" min="10" max="100" value="20">
+                    </div>
+                    <div class="control-group">
+                        <label for="speed">Velocità: <span class="value-display" id="speed-display">100ms</span></label>
+                        <input type="range" id="speed" min="10" max="1000" value="100" step="10">
+                    </div>
+                    <button id="start-btn">Avvia Ordinamento</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                <div id="status">Pronto</div>
+            </div>
+        </section>
+
+        <script src="sorting-visualization.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const visualizer = new SortingVisualizer('bars-container', 'insertionsort');
+
+                // Controlli dimensione array
+                const sizeSlider = document.getElementById('array-size');
+                const sizeDisplay = document.getElementById('size-display');
+                sizeSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    sizeDisplay.textContent = value;
+                    visualizer.setArraySize(value);
+                });
+
+                // Controlli velocità
+                const speedSlider = document.getElementById('speed');
+                const speedDisplay = document.getElementById('speed-display');
+                speedSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    speedDisplay.textContent = value + 'ms';
+                    visualizer.setSpeed(value);
+                });
+
+                // Pulsanti
+                document.getElementById('start-btn').addEventListener('click', () => visualizer.start());
+                document.getElementById('reset-btn').addEventListener('click', () => visualizer.reset());
+            });
+        </script>

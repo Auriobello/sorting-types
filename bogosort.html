@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bogosort - Algoritmo di Ordinamento</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ═══════════════════════════════════════════════════
+           FREE-FLYING ROCKET  (position:fixed, full viewport)
+           CSS vars --tx / --ty set by JS from getBoundingClientRect
+        ═══════════════════════════════════════════════════ */
+        .fly-rocket-el {
+            position: fixed;
+            font-size: 3.4rem;
+            z-index: 9999;
+            pointer-events: none;
+            transform-origin: center center;
+            will-change: transform, opacity, filter;
+            filter:
+                drop-shadow(0 0 16px #ffcc00)
+                drop-shadow(0 0 32px #ff6600)
+                drop-shadow(0 0  8px #ffffff);
+            animation: flyRocketPath 2.1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        @keyframes flyRocketPath {
+            /* ── Enter from the left ── */
+            0%  {
+                transform: translate(0px, 0px) rotate(-20deg) scale(1.7);
+                opacity: 0;
+                filter: drop-shadow(0 0 6px #ffcc00);
+            }
+            4%  { opacity: 1; }
+
+            /* ── Climb hard, arcing upward ── */
+            20% {
+                transform: translate(calc(var(--tx)*0.18), -240px) rotate(-85deg) scale(2.1);
+                filter: drop-shadow(0 0 20px #ffcc00) drop-shadow(0 0 40px #ff4400);
+            }
+
+            /* ── Crest — tip over the top ── */
+            40% {
+                transform: translate(calc(var(--tx)*0.46), -310px) rotate(-180deg) scale(2.2);
+                filter: drop-shadow(0 0 26px #ff9900) drop-shadow(0 0 52px #ff2200);
+            }
+
+            /* ── Diving, picking up speed ── */
+            62% {
+                transform: translate(calc(var(--tx)*0.74), calc(var(--ty)*0.15 - 100px)) rotate(-255deg) scale(1.8);
+                filter: drop-shadow(0 0 22px #ff6600) drop-shadow(0 0 44px #ff0000);
+            }
+
+            /* ── Final approach, screaming toward target ── */
+            85% {
+                transform: translate(calc(var(--tx)*0.94), calc(var(--ty)*0.88)) rotate(-300deg) scale(1.2);
+                filter: drop-shadow(0 0 30px #ff4400) drop-shadow(0 0 60px #ff0000) drop-shadow(0 0 10px #fff);
+            }
+
+            /* ── IMPACT ── */
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(-330deg) scale(0.04);
+                opacity: 0;
+                filter: drop-shadow(0 0 60px #ffffff);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           CRASH FLASH  (full-screen radial burst)
+        ═══════════════════════════════════════════════════ */
+        .crash-flash-el {
+            position: fixed;
+            inset: 0;
+            background: rgba(56, 198, 255, 0.88);
+            z-index: 9998;
+            pointer-events: none;
+            animation: crashFlash 0.45s ease-out forwards;
+        }
+        @keyframes crashFlash {
+            0%   { opacity: 1; }
+            30%  { opacity: 0.5; }
+            100% { opacity: 0; }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           CONTAINER SHAKE
+        ═══════════════════════════════════════════════════ */
+        @keyframes containerShake {
+            0%,100% { transform: translate(0,0) rotate(0deg); }
+            8%  { transform: translate(-9px,-6px) rotate(-1.5deg); }
+            18% { transform: translate(11px, 7px) rotate( 1.2deg); }
+            27% { transform: translate(-7px, 5px) rotate(-0.9deg); }
+            36% { transform: translate( 9px,-6px) rotate( 0.9deg); }
+            46% { transform: translate(-6px, 4px) rotate(-0.5deg); }
+            55% { transform: translate( 6px,-3px) rotate( 0.5deg); }
+            66% { transform: translate(-4px, 2px) rotate(-0.3deg); }
+            77% { transform: translate( 3px,-2px) rotate( 0.2deg); }
+            88% { transform: translate(-1px, 1px) rotate(-0.1deg); }
+        }
+        #visualization-container.shaking {
+            animation: containerShake 0.7s ease-out forwards;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           SPARKS
+        ═══════════════════════════════════════════════════ */
+        .spark-el {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9997;
+            animation: sparkFly var(--sdur, 0.75s) ease-out forwards;
+        }
+        @keyframes sparkFly {
+            0%   { transform: translate(0,0) scale(1.4); opacity: 1; }
+            55%  { opacity: 0.8; }
+            100% { transform: translate(var(--sx), var(--sy)) scale(0); opacity: 0; }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           SLIDER ON FIRE — hide original speed target + line
+        ═══════════════════════════════════════════════════ */
+        .speed-control-group.on-fire #speed-target { display: none; }
+
+        .speed-control-group.on-fire #speed {
+            animation: sliderFireGlow 0.32s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 10px #43d8ff) drop-shadow(0 0 20px rgba(58, 216, 255, 0.8));
+        }
+        @keyframes sliderFireGlow {
+            from { filter: drop-shadow(0 0 8px #3ad8ff) drop-shadow(0 0 16px rgba(62, 213, 255, 0.7)); }
+            to   { filter: drop-shadow(0 0 18px #6bf2ff) drop-shadow(0 0 32px rgba(95, 240, 255, 0.9)); }
+        }
+
+        /* ═══════════════════════════════════════════════════
+           FLAME PARTICLES above slider
+        ═══════════════════════════════════════════════════ */
+        #flames-wrapper {
+            display: none;
+            position: absolute;
+            left: -4px;
+            right: -4px;
+            top: 18px;
+            height: 56px;
+            transform: translateY(-100%);
+            pointer-events: none;
+            z-index: 20;
+            overflow: visible;
+            align-items: flex-end;
+            justify-content: space-around;
+        }
+        .speed-control-group.on-fire #flames-wrapper { display: flex; }
+
+        .flame-p {
+            border-radius: 50% 50% 20% 20%;
+            background: linear-gradient(to top, rgba(34, 177, 255, 1) 0%, rgba(52, 219, 255, 1) 35%, rgba(172, 244, 255, 0.8) 72%, rgba(118, 233, 255, 0) 100%);
+            box-shadow: inset 0 0 8px rgba(59, 214, 255, 0.9), 0 0 18px rgba(44, 181, 255, 0.55);
+            transform-origin: bottom center;
+            animation: flameDance var(--fdur,0.4s) ease-in-out var(--fdel,0s) infinite alternate;
+            width: 11px;
+        }
+        @keyframes flameDance {
+            from { transform: scaleY(1)    scaleX(1)    rotate(var(--fr1,-5deg)); opacity: 1; }
+            to   { transform: scaleY(0.50) scaleX(0.68) rotate(var(--fr2, 5deg)); opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="bogosort.html">Bogosort</a></li>
+            <li><a href="quicksort.html">Quicksort</a></li>
+            <li><a href="bubblesort.html">Bubblesort</a></li>
+            <li><a href="shakesort.html">Shakesort</a></li>
+            <li><a href="insertionsort.html">Insertionsort</a></li>
+            <li><a href="selectionsort.html">Selectionsort</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>Bogosort</h1>
+        <p>L'algoritmo di ordinamento più inefficiente mai concepito</p>
+    </header>
+
+    <main>
+        <section id="introduzione">
+            <h2>Introduzione</h2>
+            <p>Bogosort è un algoritmo di ordinamento che funziona mescolando casualmente gli elementi dell'array fino a quando non risultano ordinati. È anche conosciuto come "stupid sort" o "slowsort" per la sua inefficienza.</p>
+            <p><strong>Complessità temporale:</strong> O(n!)</p>
+            <p><em>Attenzione: Questo algoritmo non dovrebbe mai essere utilizzato in produzione!</em></p>
+        </section>
+
+        <section id="ordinato">
+            <h2>Funzione <code>ordinato</code></h2>
+            <pre><code>int ordinato(int v[], int n) {
+    for (int i = 0; i &lt; n - 1; i++) {
+        if (v[i] &gt; v[i + 1]) {
+            return 0;
+        }
+    }
+    return 1;
+}</code></pre>
+            <p>Questa funzione controlla se l'array è ordinato in ordine crescente. Scorre l'array e verifica se ogni elemento è minore o uguale al successivo. Restituisce 1 se ordinato, 0 altrimenti.</p>
+        </section>
+
+        <section id="mescola">
+            <h2>Funzione <code>mescola</code></h2>
+            <pre><code>void mescola(int v[], int n) {
+    for (int i = 0; i &lt; n; i++) {
+        int j = rand() % n;
+        int tmp = v[i];
+        v[i] = v[j];
+        v[j] = tmp;
+    }
+}</code></pre>
+            <p>Questa funzione mescola casualmente l'array. Per ogni posizione i, sceglie un indice j casuale e scambia v[i] con v[j]. Questo crea una permutazione casuale dell'array.</p>
+        </section>
+
+        <section id="bogosort">
+            <h2>Funzione <code>bogoSort</code></h2>
+            <pre><code>void bogoSort(int v[], int n) {
+    while (!ordinato(v, n)) {
+        mescola(v, n);
+    }
+}</code></pre>
+            <p>Questa è la funzione principale dell'algoritmo. Continua a mescolare l'array fino a quando la funzione <code>ordinato</code> non restituisce vero (1). In teoria, prima o poi l'array sarà ordinato, ma in pratica potrebbe richiedere un tempo infinito.</p>
+        </section>
+
+        <section id="esecuzione">
+            <h2>Esecuzione del Programma</h2>
+            <p>Il programma genera un array di 10 numeri casuali compresi tra 0 e 99, lo ordina utilizzando Bogosort e stampa i risultati.</p>
+            <p><strong>Esempio di output:</strong></p>
+            <pre><code>Generazione array casuale per Bogosort:
+45 23 67 12 89 34 56 78 90 1
+Array non ordinato.
+
+Array ordinato con Bogosort:
+1 12 23 34 45 56 67 78 89 90</code></pre>
+        </section>
+
+        <section id="visualizzazione">
+            <h2>Visualizzazione Bogosort</h2>
+            <div id="visualization-container">
+                <div id="bars-container"></div>
+                <div id="controls">
+                    <div class="control-group">
+                        <label for="array-size">Numeri: <span class="value-display" id="size-display">20</span></label>
+                        <input type="range" id="array-size" min="10" max="100" value="20">
+                    </div>
+                    <div class="control-group speed-control-group" id="speed-group">
+                        <label for="speed">Velocità: <span class="value-display" id="speed-display">100ms</span></label>
+                        <div id="flames-wrapper">
+                            <div class="flame-p" style="height:38px;--fdur:0.38s;--fdel:0.00s;--fr1:-6deg;--fr2:4deg"></div>
+                            <div class="flame-p" style="height:28px;--fdur:0.43s;--fdel:0.07s;--fr1:-3deg;--fr2:6deg"></div>
+                            <div class="flame-p" style="height:42px;--fdur:0.36s;--fdel:0.13s;--fr1:-7deg;--fr2:3deg"></div>
+                            <div class="flame-p" style="height:32px;--fdur:0.45s;--fdel:0.04s;--fr1:-4deg;--fr2:7deg"></div>
+                            <div class="flame-p" style="height:44px;--fdur:0.40s;--fdel:0.10s;--fr1:-8deg;--fr2:2deg"></div>
+                            <div class="flame-p" style="height:30px;--fdur:0.37s;--fdel:0.17s;--fr1:-2deg;--fr2:8deg"></div>
+                            <div class="flame-p" style="height:40px;--fdur:0.42s;--fdel:0.08s;--fr1:-5deg;--fr2:5deg"></div>
+                            <div class="flame-p" style="height:26px;--fdur:0.39s;--fdel:0.14s;--fr1:-4deg;--fr2:6deg"></div>
+                            <div class="flame-p" style="height:36px;--fdur:0.41s;--fdel:0.05s;--fr1:-6deg;--fr2:3deg"></div>
+                        </div>
+                        <input type="range" id="speed" min="10" max="1000" value="100" step="10">
+                        <div id="speed-target">
+                            <div id="speed-line"></div>
+                            <div id="rocket">🚀</div>
+                            <div id="fire-burst"></div>
+                        </div>
+                    </div>
+                    <button id="super-btn" class="super-mode-btn">🚀 Modalità Super</button>
+                    <button id="start-btn">Avvia Ordinamento</button>
+                    <button id="reset-btn">Reset</button>
+                    <button id="cancel-btn" class="cancel-btn">Ignora Timeout</button>
+                </div>
+                <div id="status">Pronto</div>
+            </div>
+        </section>
+
+        <script src="sorting-visualization.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const visualizer = new SortingVisualizer('bars-container', 'bogosort');
+                const superBtn = document.getElementById('super-btn');
+                const cancelBtn = document.getElementById('cancel-btn');
+                const rocket = document.getElementById('rocket');
+                const fireBurst = document.getElementById('fire-burst');
+
+                // Controlli dimensione array
+                const sizeSlider = document.getElementById('array-size');
+                const sizeDisplay = document.getElementById('size-display');
+                sizeSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    sizeDisplay.textContent = value;
+                    visualizer.setArraySize(value);
+                });
+
+                // Controlli velocità
+                const speedSlider = document.getElementById('speed');
+                const speedDisplay = document.getElementById('speed-display');
+                speedSlider.addEventListener('input', function() {
+                    const value = parseInt(this.value);
+                    speedDisplay.textContent = value + 'ms';
+                    visualizer.setSpeed(value);
+                });
+
+                // Pulsante modalità super
+                superBtn.addEventListener('click', function() {
+                    const isSuper = visualizer.toggleSuperMode();
+                    if (isSuper) {
+                        superBtn.classList.add('active');
+                        superBtn.textContent = '🔥 SUPER ATTIVA';
+                        speedSlider.disabled = true;
+                        startRocket();
+                        speedDisplay.textContent = '1ms';
+                    } else {
+                        superBtn.classList.remove('active');
+                        superBtn.textContent = '🚀 Modalità Super';
+                        speedSlider.disabled = false;
+                        resetRocket();
+                        speedDisplay.textContent = speedSlider.value + 'ms';
+                    }
+                });
+
+                cancelBtn.addEventListener('click', function() {
+                    if (visualizer.disableTimeout()) {
+                        cancelBtn.disabled = true;
+                    }
+                });
+
+                document.getElementById('start-btn').addEventListener('click', () => {
+                    cancelBtn.disabled = false;
+                    visualizer.timeoutEnabled = true;
+                    visualizer.cancelUsed = false;
+                    visualizer.start();
+                });
+                document.getElementById('reset-btn').addEventListener('click', () => {
+                    if (visualizer.superMode) {
+                        visualizer.toggleSuperMode();
+                        superBtn.classList.remove('active');
+                        superBtn.textContent = '🚀 Modalità Super';
+                        speedSlider.disabled = false;
+                    }
+                    speedDisplay.textContent = speedSlider.value + 'ms';
+                    visualizer.reset();
+                    cancelBtn.disabled = false;
+                    resetRocket();
+                });
+
+                function startRocket() {
+                    const speedGroup = document.getElementById('speed-group');
+                    // Kill any leftover elements from a previous activation
+                    document.querySelectorAll('.fly-rocket-el,.crash-flash-el,.spark-el').forEach(el => el.remove());
+                    speedGroup.classList.remove('on-fire');
+
+                    // ── Where exactly is the speed slider on screen? ──
+                    const rect = speedSlider.getBoundingClientRect();
+                    const targetX = rect.left + rect.width  / 2;
+                    const targetY = rect.top  + rect.height / 2;
+
+                    // ── Rocket starts off-screen left, vertically level with slider ──
+                    const startX = -90;
+                    const startY = targetY + 40; // a bit below so arc feels natural
+
+                    const flyRocket = document.createElement('div');
+                    flyRocket.className = 'fly-rocket-el';
+                    flyRocket.textContent = '🚀';
+                    flyRocket.style.left = startX + 'px';
+                    flyRocket.style.top  = startY + 'px';
+                    // CSS vars drive the keyframe calc() expressions
+                    flyRocket.style.setProperty('--tx', (targetX - startX) + 'px');
+                    flyRocket.style.setProperty('--ty', (targetY - startY) + 'px');
+                    document.body.appendChild(flyRocket);
+
+                    flyRocket.addEventListener('animationend', () => {
+                        flyRocket.remove();
+                        _triggerCrash(targetX, targetY, speedGroup);
+                    }, { once: true });
+                }
+
+                function _triggerCrash(cx, cy, speedGroup) {
+                    // 1 ── Full-screen flash
+                    const flash = document.createElement('div');
+                    flash.className = 'crash-flash-el';
+                    document.body.appendChild(flash);
+                    flash.addEventListener('animationend', () => flash.remove(), { once: true });
+
+                    // 2 ── Container shake
+                    const visCont = document.getElementById('visualization-container');
+                    visCont.classList.remove('shaking');
+                    void visCont.offsetWidth;
+                    visCont.classList.add('shaking');
+                    visCont.addEventListener('animationend', () => visCont.classList.remove('shaking'), { once: true });
+
+                    // 3 ── 20 sparks fanning out in all directions
+                    const sparkColors = ['#7ef0ff','#4be3ff','#08c6ff','#a6f7ff','#e5ffff','#b0f0ff'];
+                    for (let i = 0; i < 20; i++) {
+                        const spark = document.createElement('div');
+                        spark.className = 'spark-el';
+                        const angle = (Math.PI * 2 * i / 20) + (Math.random() - 0.5) * 0.5;
+                        const dist  = 55 + Math.random() * 140;
+                        const size  = 5 + Math.random() * 7;
+                        const col   = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+                        spark.style.cssText = `
+                            left: ${cx - size/2}px; top: ${cy - size/2}px;
+                            width: ${size}px; height: ${size}px;
+                            background: ${col};
+                            box-shadow: 0 0 ${size*1.5}px ${col}, 0 0 ${size*3}px ${col};
+                        `;
+                        spark.style.setProperty('--sx',   Math.cos(angle) * dist + 'px');
+                        spark.style.setProperty('--sy',   Math.sin(angle) * dist + 'px');
+                        spark.style.setProperty('--sdur', (0.40 + Math.random() * 0.60) + 's');
+                        document.body.appendChild(spark);
+                        spark.addEventListener('animationend', () => spark.remove(), { once: true });
+                    }
+
+                    // 4 ── Light the slider on fire once the smoke settles
+                    setTimeout(() => speedGroup.classList.add('on-fire'), 380);
+                }
+
+                function resetRocket() {
+                    const speedGroup = document.getElementById('speed-group');
+                    document.querySelectorAll('.fly-rocket-el,.crash-flash-el,.spark-el').forEach(el => el.remove());
+                    speedGroup.classList.remove('on-fire');
+                    const visCont = document.getElementById('visualization-container');
+                    visCont.classList.remove('shaking');
+                }
+            });
+        </script>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Presentazione Bogosort</p>
+    </footer>
+</body>
+</html>
