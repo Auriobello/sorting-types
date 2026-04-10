@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GnomeSort - Algoritmo di Ordinamento</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="bogosort.html">Bogosort</a></li>
+            <li><a href="quicksort.html">Quicksort</a></li>
+            <li><a href="bubblesort.html">Bubblesort</a></li>
+            <li><a href="shakesort.html">Shakesort</a></li>
+            <li><a href="insertionsort.html">Insertionsort</a></li>
+            <li><a href="selectionsort.html">Selectionsort</a></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h1>GnomeSort</h1>
+        <p>Algoritmo di ordinamento ottimo per piccoli array</p>
+    </header>
+
+    <main>
+        <section id="introduzione">
+            <h2>Introduzione</h2>
+            <p>GnomeSort è un algoritmo di ordinamento molto semplice che funziona in modo simile al sort “gnome” di cui è stato così chiamato per il suo comportamento quasi “dinosauro”. Confronta e, se necessario, scambia coppie di elementi adiacenti fino a quando l’intero array non è ordinato. È ideale per array di dimensioni ridotte.</p>
+            <p><strong>Complessità temporale:</strong> O(n²) in tutti i casi</p>
+            <p><strong>Complessità spaziale:</strong> O(1) (ordinamento in loco)</p>
+        </section>
+
+        <section id="funzionamento">
+            <h2>Come Funziona</h2>
+            <ol>
+                <li>Si parte dall’indice 0.</li>
+                <li>Se l’indice è 0 o l’elemento corrente è maggiore o uguale al precedente, si passa al successivo.</li>
+                <li>Altrimenti si scambiano gli elementi e si torna indietro di una posizione.</li>
+                <li>Il processo si ripete finché non si raggiunge la fine dell’array.</li>
+            </ol>
+        </section>
+
+        <section id="implementazione">
+            <h2>Implementazione di Esempio (C)</h2>
+            <pre><code>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+const int GRANDEZZA = 10;
+const int MAX = 100;
+const int MIN = 1;
+
+void riempiArr (int arr[GRANDEZZA]) {
+    srand(time(NULL));
+    for (int i = 0; i &lt; GRANDEZZA; i++){
+        arr[i] = (rand() % (MAX - MIN + 1)) + MIN;
+    }
+}
+
+void gnomeSort (int arr[GRANDEZZA]) {
+    int i = 0;
+    while (i &lt; GRANDEZZA) {
+        if (i == 0 || arr[i] >= arr[i-1]) {
+            i++;
+        } else {
+            int temp = arr[i];
+            arr[i] = arr[i-1];
+            arr[i-1] = temp;
+            i--;
+        }
+    }
+}
+
+void stampaArr(int arr[GRANDEZZA]) {
+    for(int i = 0; i &lt; GRANDEZZA; i++){
+        printf("%d\t", arr[i]);
+    }
+}
+
+int main () {
+    int arr[GRANDEZZA];
+    printf("\n---\tINIZIO\t---\n");
+
+    riempiArr(arr);
+    printf("\nArray non ordinato:\n");
+    stampaArr(arr);
+    gnomeSort(arr);
+    printf("\nArray ordinato:\n");
+    stampaArr(arr);
+
+    printf("\n---\nFINE\t---\n");
+    return 0;
+}
+            </code></pre>
+            <p>Il ciclo principale utilizza una singola variabile di indice che avanza solo quando l’array è già ordinato localmente, garantendo un comportamento simile a quello di un “gnomo” che si muove lentamente, fermandosi a controllare la propria posizione.</p>
+        </section>
+
+        <section id="ottimizzazioni">
+            <h2>Ottimizzazioni</h2>
+            <p>Una versione ottimizzata può terminare l’algoritmo non appena l’intero array è ordinato, evitando inutili passaggi:</p>
+            <pre><code>
+void gnomeSortOptimized(int arr[GRANDEZZA]) {
+    int i = 0;
+    int sorted = 0;  // flag che indica se l’array è già ordinato
+    while (i &lt; GRANDEZZA) {
+        if (i == 0 || arr[i] >= arr[i-1]) {
+            i++;
+            sorted = 1;   // nessuno scambio nella posizione corrente
+        } else {
+            int temp = arr[i];
+            arr[i] = arr[i-1];
+            arr[i-1] = temp;
+            i--;
+            sorted = 0;   // scambio avvenuto, quindi non è ancora ordinato
+        }
+    }
+    // Se l’algoritmo è finito con sorted==1, l’array era già ordinato
+}
+            </code></pre>
+        </section>
+
+        <section id="vantaggi">
+            <h2>Vantaggi e Svantaggi</h2>
+            <p><strong>Vantaggi:</strong></p>
+            <ul>
+                <li>Semplice da implementare e comprendere</li>
+                <li>Ordinamento in loco</li>
+                <li>Stabile (preserva l’ordine degli elementi uguali)</li>
+            </ul>
+            <p><strong>Svantaggi:</strong></p>
+            <ul>
+                <li>Molto lento per array grandi (O(n²))</li>
+                <li>Non adatto per uso pratico in applicazioni di produzione</li>
+            </ul>
+        </section>
+
+        <section id="conclusione">
+            <h2>Conclusione</h2>
+            <p>GnomeSort è un algoritmo didattico eccellente che illustra concetti di confronto e scambio in modo intuitivo. È utile soprattutto per piccoli dataset e per introdurre principi di ordinamento. Per dataset più grandi, è consigliabile optare per algoritmi più efficienti come Quicksort, MergeSort o HeapSort.</p>
+        </section>
+
+        <section id="visualizzazione">
+            <h2>Visualizzazione GnomeSort</h2>
+            <div id="visualization-container">
+                <div id="bars-container"></div>
+                <div id="controls">
+                    <div class="control-group">
+                        <label for="array-size">Numeri: <span class="value-display" id="size-display">20</span></label>
+                        <input type="range" id="array-size" min="10" max="100" value="20">
+                    </div>
+                    <div class="control-group">
+                        <label for="speed">Velocità: <span class="value-display" id="speed-display">100ms</span></label>
+                        <input type="range" id="speed" min="10" max="1000" value="100" step="10">
+                    </div>
+                    <button id="start-btn">Avvia Ordinamento</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                <div id="status">Pronto</div>
+            </div>
+        </section>
+
+        <script src="sorting-visualization.js"></script>
+        <script>
+            
+        </script>
+    </main>
+</body>
+</html>
