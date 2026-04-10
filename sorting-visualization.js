@@ -311,3 +311,158 @@ class SortingVisualizer {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
+
+// ═══════════════════════════════════════════════════
+// BOGOSORT PAGE-SPECIFIC INITIALIZATION (moved from bogosort.html)
+// Only runs on bogosort.html
+// ═══════════════════════════════════════════════════
+if (window.location.pathname.includes('bogosort.html') || window.location.pathname.includes('bogosort')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        const visualizer = new SortingVisualizer('bars-container', 'bogosort');
+        const superBtn = document.getElementById('super-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const rocket = document.getElementById('rocket');
+        const fireBurst = document.getElementById('fire-burst');
+
+        // Controlli dimensione array
+        const sizeSlider = document.getElementById('array-size');
+        const sizeDisplay = document.getElementById('size-display');
+        sizeSlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            sizeDisplay.textContent = value;
+            visualizer.setArraySize(value);
+        });
+
+        // Controlli velocità
+        const speedSlider = document.getElementById('speed');
+        const speedDisplay = document.getElementById('speed-display');
+        speedSlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            speedDisplay.textContent = value + 'ms';
+            visualizer.setSpeed(value);
+        });
+
+        // Pulsante modalità super
+        superBtn.addEventListener('click', function() {
+            const isSuper = visualizer.toggleSuperMode();
+            if (isSuper) {
+                superBtn.classList.add('active');
+                superBtn.textContent = '🔥 SUPER ATTIVA';
+                speedSlider.disabled = true;
+                startRocket();
+                speedDisplay.textContent = '1ms';
+            } else {
+                superBtn.classList.remove('active');
+                superBtn.textContent = '🚀 Modalità Super';
+                speedSlider.disabled = false;
+                resetRocket();
+                speedDisplay.textContent = speedSlider.value + 'ms';
+            }
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            if (visualizer.disableTimeout()) {
+                cancelBtn.disabled = true;
+            }
+        });
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            cancelBtn.disabled = false;
+            visualizer.timeoutEnabled = true;
+            visualizer.cancelUsed = false;
+            visualizer.start();
+        });
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if (visualizer.superMode) {
+                visualizer.toggleSuperMode();
+                superBtn.classList.remove('active');
+                superBtn.textContent = '🚀 Modalità Super';
+                speedSlider.disabled = false;
+            }
+            speedDisplay.textContent = speedSlider.value + 'ms';
+            visualizer.reset();
+            cancelBtn.disabled = false;
+            resetRocket();
+        });
+
+        function startRocket() {
+            const speedGroup = document.getElementById('speed-group');
+            // Kill any leftover elements from a previous activation
+            document.querySelectorAll('.fly-rocket-el,.crash-flash-el,.spark-el').forEach(el => el.remove());
+            speedGroup.classList.remove('on-fire');
+
+            // ── Where exactly is the speed slider on screen? ──
+            const rect = speedSlider.getBoundingClientRect();
+            const targetX = rect.left + rect.width  / 2;
+            const targetY = rect.top  + rect.height / 2;
+
+            // ── Rocket starts off-screen left, vertically level with slider ──
+            const startX = -90;
+            const startY = targetY + 40; // a bit below so arc feels natural
+
+            const flyRocket = document.createElement('div');
+            flyRocket.className = 'fly-rocket-el';
+            flyRocket.textContent = '🚀';
+            flyRocket.style.left = startX + 'px';
+            flyRocket.style.top  = startY + 'px';
+            // CSS vars drive the keyframe calc() expressions
+            flyRocket.style.setProperty('--tx', (targetX - startX) + 'px');
+            flyRocket.style.setProperty('--ty', (targetY - startY) + 'px');
+            document.body.appendChild(flyRocket);
+
+            flyRocket.addEventListener('animationend', () => {
+                flyRocket.remove();
+                _triggerCrash(targetX, targetY, speedGroup);
+            }, { once: true });
+        }
+
+        function _triggerCrash(cx, cy, speedGroup) {
+            // 1 ── Full-screen flash
+            const flash = document.createElement('div');
+            flash.className = 'crash-flash-el';
+            document.body.appendChild(flash);
+            flash.addEventListener('animationend', () => flash.remove(), { once: true });
+
+            // 2 ── Container shake
+            const visCont = document.getElementById('visualization-container');
+            visCont.classList.remove('shaking');
+            void visCont.offsetWidth;
+            visCont.classList.add('shaking');
+            visCont.addEventListener('animationend', () => visCont.classList.remove('shaking'), { once: true });
+
+            // 3 ── 20 sparks fanning out in all directions
+            const sparkColors = ['#7ef0ff','#4be3ff','#08c6ff','#a6f7ff','#e5ffff','#b0f0ff'];
+            for (let i = 0; i < 20; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark-el';
+                const angle = (Math.PI * 2 * i / 20) + (Math.random() - 0.5) * 0.5;
+                const dist  = 55 + Math.random() * 140;
+                const size  = 5 + Math.random() * 7;
+                const col   = sparkColors[Math.floor(Math.random() * sparkColors.length)];
+                spark.style.cssText = `
+                    left: ${cx - size/2}px; top: ${cy - size/2}px;
+                    width: ${size}px; height: ${size}px;
+                    background: ${col};
+                    box-shadow: 0 0 ${size*1.5}px ${col}, 0 0 ${size*3}px ${col};
+                `;
+                spark.style.setProperty('--sx',   Math.cos(angle) * dist + 'px');
+                spark.style.setProperty('--sy',   Math.sin(angle) * dist + 'px');
+                spark.style.setProperty('--sdur', (0.40 + Math.random() * 0.60) + 's');
+                document.body.appendChild(spark);
+                spark.addEventListener('animationend', () => spark.remove(), { once: true });
+            }
+
+            // 4 ── Light the slider on fire once the smoke settles
+            setTimeout(() => speedGroup.classList.add('on-fire'), 380);
+        }
+
+        function resetRocket() {
+            const speedGroup = document.getElementById('speed-group');
+            document.querySelectorAll('.fly-rocket-el,.crash-flash-el,.spark-el').forEach(el => el.remove());
+            speedGroup.classList.remove('on-fire');
+            const visCont = document.getElementById('visualization-container');
+            visCont.classList.remove('shaking');
+        }
+    });
+}
+
