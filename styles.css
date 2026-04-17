@@ -84,6 +84,20 @@ section p {
     margin: 1rem 0;
     color: #e0e0e0;
 }
+a button{
+    color:#ff6b6b;
+    background-color: #1a1a1a;
+    border-color: #ff6b6b;
+    border-radius: 20px;
+    width:30%;
+    height: 40px;
+}
+
+a button:hover{
+    color:#1a1a1a;
+    background-color: #ff6b6b;
+    border-color: #ff6b6b;
+}
 
 .algoritmo-coppia {
     margin-bottom: 2rem;

@@ -10,12 +10,14 @@
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="bogosort.html">Bogosort</a></li>
-            <li><a href="quicksort.html">Quicksort</a></li>
-            <li><a href="bubblesort.html">Bubblesort</a></li>
-            <li><a href="shakesort.html">Shakesort</a></li>
-            <li><a href="insertionsort.html">Insertionsort</a></li>
-            <li><a href="selectionsort.html">Selectionsort</a></li>
+            <li><a href="bogosort.html">BogoSort</a></li>
+            <li><a href="quicksort.html">QuickSort</a></li>
+            <li><a href="bubblesort.html">BubbleSort</a></li>
+            <li><a href="shakesort.html">ShakeSort</a></li>
+            <li><a href="insertionsort.html">InsertionSort</a></li>
+            <li><a href="selectionsort.html">SelectionSort</a></li>
+            <li><a href="gnomesort.html">GnomeSort</a></li>
+            <li><a href="thanossort.html">ThanosSort</a></li>
         </ul>
     </nav>
 
@@ -42,7 +44,12 @@
                 <li>Continua fino a quando non ci sono più scambi</li>
             </ol>
         </section>
-
+        <section id="download">
+            <h2>Download Codice</h2>
+            <a href="./codiciC/bubbleSort.c" download>
+            <button type="button">bubbleSort.c</button>
+            </a>
+        </section>
         <section id="implementazione">
             <h2>Implementazione di Esempio</h2>
             <pre><code>
@@ -95,7 +102,7 @@ void main (){
     printf("\nArray ordinato:\n");
     stampaArr(arr);
 
-    printf("\n---\nFINE\t---\n");
+    printf("\n---\tFINE\t---\n");
 }
 </code></pre>
             <p>Il ciclo esterno controlla il numero di passaggi, mentre quello interno confronta e scambia gli elementi adiacenti.</p>

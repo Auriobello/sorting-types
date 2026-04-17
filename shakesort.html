@@ -10,12 +10,14 @@
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
-            <li><a href="bogosort.html">Bogosort</a></li>
-            <li><a href="quicksort.html">Quicksort</a></li>
-            <li><a href="bubblesort.html">Bubblesort</a></li>
-            <li><a href="shakesort.html">Shakesort</a></li>
-            <li><a href="insertionsort.html">Insertionsort</a></li>
-            <li><a href="selectionsort.html">Selectionsort</a></li>
+            <li><a href="bogosort.html">BogoSort</a></li>
+            <li><a href="quicksort.html">QuickSort</a></li>
+            <li><a href="bubblesort.html">BubbleSort</a></li>
+            <li><a href="shakesort.html">ShakeSort</a></li>
+            <li><a href="insertionsort.html">InsertionSort</a></li>
+            <li><a href="selectionsort.html">SelectionSort</a></li>
+            <li><a href="gnomesort.html">GnomeSort</a></li>
+            <li><a href="thanossort.html">ThanosSort</a></li>
         </ul>
     </nav>
 
@@ -40,23 +42,45 @@
                 <li>Ripeti alternando le direzioni fino a quando non ci sono scambi</li>
             </ol>
         </section>
-
+        <section id="download">
+            <h2>Download Codice</h2>
+            <a href="./codiciC/shakeSort.c" download>
+            <button type="button">shakeSort.c</button>
+            </a>
+        </section>
         <section id="implementazione">
             <h2>Implementazione in C</h2>
-            <pre><code>void cocktailSort(int a[], int n) {
+            <pre><code>
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;time.h&gt;
+
+const int GRANDEZZA = 10;
+const int MAX = 100;
+const int MIN = 1;
+
+void riempiArr (int arr[GRANDEZZA]) {
+    srand(time(NULL));
+    for (int i = 0; i &lt; GRANDEZZA; i++){
+        arr[i] = (rand() % (MAX - MIN + 1)) + MIN;
+    }
+}
+
+void ordinamentoArr(int arr[]) {
     int swapped = 1;
-    int start = 0;
-    int end = n - 1;
+    int start = 0;              //Variabile inizio
+    int end = GRANDEZZA - 1;    /*variabile per la fine dell'array
+                                (-1, tanto il primo è per forza il più grande)*/
 
     while (swapped) {
         swapped = 0;
 
         // Passaggio da sinistra a destra
-        for (int i = start; i &lt; end; ++i) {
-            if (a[i] &gt; a[i + 1]) {
-                int temp = a[i];
-                a[i] = a[i + 1];
-                a[i + 1] = temp;
+        for (int i = start; i &lt; end; ++i) { //i da inizio (0) a fine (end)
+            if (arr[i] > arr[i + 1]) {
+                int temp = arr[i];
+                arr[i] = arr[i + 1];
+                arr[i + 1] = temp;
                 swapped = 1;
             }
         }
@@ -69,18 +93,42 @@
         --end;
 
         // Passaggio da destra a sinistra
-        for (int i = end - 1; i &gt;= start; --i) {
-            if (a[i] &gt; a[i + 1]) {
-                int temp = a[i];
-                a[i] = a[i + 1];
-                a[i + 1] = temp;
+        for (int i = end - 1; i >= start; --i) {
+            if (arr[i] > arr[i + 1]) {
+                int temp = arr[i];
+                arr[i] = arr[i + 1];
+                arr[i + 1] = temp;
                 swapped = 1;
             }
         }
 
         ++start;
     }
-}</code></pre>
+}
+
+void stampaArr(int arr[GRANDEZZA]) {
+    
+    for(int i = 0; i &lt; GRANDEZZA; i++){
+        printf("%d\t", arr[i]);
+    }
+}
+
+void main (){
+
+    int arr[GRANDEZZA];
+    printf("\n---\tINIZIO\t---\n");
+
+    riempiArr(arr);
+    printf("\nArray non ordinato:\n");
+    stampaArr(arr);
+    ordinamentoArr(arr);
+    printf("\nArray ordinato:\n");
+    stampaArr(arr);
+
+    printf("\n---\tFINE\t---\n");
+}
+
+</code></pre>
             <p>Questa implementazione ottimizzata ferma l'algoritmo quando non ci sono più scambi in un passaggio completo.</p>
         </section>
 
