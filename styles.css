@@ -246,6 +246,20 @@ section p {
     margin: 1rem 0;
     color: #e0e0e0;
 }
+a button{
+    color:#ff6b6b;
+    background-color: #1a1a1a;
+    border-color: #ff6b6b;
+    border-radius: 20px;
+    width:30%;
+    height: 40px;
+}
+
+a button:hover{
+    color:#1a1a1a;
+    background-color: #ff6b6b;
+    border-color: #ff6b6b;
+}
 
 .algoritmo-coppia {
     margin-bottom: 2rem;
@@ -283,6 +297,15 @@ section p {
 .algoritmo-card.coppia3 h3 a {
     color: #feca57;
 }
+.algoritmo-card.coppia4 {
+    border-color: #62fe57;
+    background-color: rgba(123, 254, 87, 0.1);
+}
+
+.algoritmo-card.coppia4 h3 a {
+    color: #62fe57;
+}
+
 
 code {
     background-color: #2a2a2a;
@@ -742,4 +765,8 @@ footer p {
         font-size: 1rem !important;
         padding: 0.4rem 0.8rem !important;
     }
+}
+
+.descrizione{
+    margin-left: 4%;
 }
